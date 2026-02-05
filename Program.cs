@@ -5,34 +5,51 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
-// 1. DATABASE
-// =======================
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// ==========================================
+// 1. RENDER CONFIG: Dynamic Port & Connection
+// ==========================================
+// Tells the app to listen on the port Render provides
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
+// Reads from Environment Variables (Render) OR appsettings (Local)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                      ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // =======================
-// 2. MVC
+// 2. MVC & AUTH SERVICES
 // =======================
 builder.Services.AddControllersWithViews();
 
-// =======================
-// 3. COOKIE AUTH
-// =======================
 builder.Services.AddAuthentication("Cookies")
     .AddCookie("Cookies", options =>
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/Login";
-
-        // IMPORTANT: Needed for Remember Me
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
     });
 
 var app = builder.Build();
+
+// ==========================================
+// 3. AUTO-MIGRATE: Run on Startup
+// ==========================================
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate(); // This creates tables on Somee automatically
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration Error: {ex.Message}");
+    }
+}
 
 // =======================
 // 4. PIPELINE
@@ -46,22 +63,16 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-// =======================
-// 5. AUTHENTICATION
-// =======================
 app.UseAuthentication();
 
 // =======================
-// 6. GLOBAL BLOCK CHECK
-// REQUIREMENT #5
+// 5. GLOBAL BLOCK CHECK
 // =======================
 app.Use(async (context, next) =>
 {
-    var path = context.Request.Path.Value?.ToLower();
+    var path = context.Request.Path.Value?.ToLower() ?? "";
 
-    // NOTE: Skip login & register to avoid redirect loop
-    if (path!.Contains("/account/login") || path.Contains("/account/register"))
+    if (path.Contains("/account/login") || path.Contains("/account/register"))
     {
         await next();
         return;
@@ -75,8 +86,6 @@ app.Use(async (context, next) =>
         if (userId != null)
         {
             var user = await db.Users.FindAsync(int.Parse(userId));
-
-            // IMPORTANT: Blocked or deleted users are logged out
             if (user == null || user.Status == "blocked")
             {
                 await context.SignOutAsync("Cookies");
@@ -85,18 +94,11 @@ app.Use(async (context, next) =>
             }
         }
     }
-
     await next();
 });
 
-// =======================
-// 7. AUTHORIZATION
-// =======================
 app.UseAuthorization();
 
-// =======================
-// 8. ROUTING
-// =======================
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
