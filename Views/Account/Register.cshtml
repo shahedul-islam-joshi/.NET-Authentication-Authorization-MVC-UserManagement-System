@@ -1,0 +1,53 @@
+﻿@model AuthManagerEnterprise.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="text-center fw-bold mb-1">THE APP</h2>
+                    <p class="text-center text-muted mb-4">Start your journey</p>
+                    <h5 class="text-center mb-4">Create an account</h5>
+
+                    <form asp-action="Register" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label small fw-bold">Full Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter your name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label small fw-bold">E-mail</label>
+                            <input asp-for="Email" class="form-control" placeholder="test@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label small fw-bold">Password</label>
+                            <input asp-for="Password" type="password" class="form-control" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Sign Up</button>
+
+                        <p class="text-center small mb-0">
+                            Already have an account? <a asp-action="Login" class="text-decoration-none">Sign In</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,93 @@
+﻿@model IEnumerable<AuthManagerEnterprise.Models.DomainModels.User>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container mt-4">
+
+    <!-- TOOLBAR (ALWAYS VISIBLE) -->
+    <form asp-action="BulkAction" method="post">
+
+        <div class="btn-toolbar mb-3 shadow-sm p-2 bg-light border rounded" role="toolbar">
+            <button type="submit" name="action" value="Block" class="btn btn-warning me-2">
+                Block
+            </button>
+
+            <button type="submit" name="action" value="Unblock"
+                    class="btn btn-outline-secondary me-2"
+                    title="Unblock selected users">
+                <i class="bi bi-unlock"></i>
+            </button>
+
+            <button type="submit" name="action" value="Delete"
+                    class="btn btn-outline-danger me-2"
+                    title="Delete selected users">
+                <i class="bi bi-trash"></i>
+            </button>
+
+            <button type="submit" name="action" value="DeleteUnverified"
+                    class="btn btn-outline-dark"
+                    title="Delete all unverified users">
+                <i class="bi bi-person-x"></i>
+            </button>
+        </div>
+
+        <!-- USERS TABLE -->
+        <table class="table table-hover border">
+            <thead class="table-secondary">
+                <tr>
+                    <!-- IMPORTANT: Select / Deselect All -->
+                    <th class="text-center">
+                        <input type="checkbox" id="selectAll" />
+                    </th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Last Login</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   name="userIds"
+                                   value="@user.Id"
+                                   class="user-checkbox" />
+                        </td>
+
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+
+                        <td>
+                            @(user.LastLoginTime?.ToString("g") ?? "Never")
+                        </td>
+
+                        <td>
+                            <!-- IMPORTANT: Correct status coloring -->
+                            <span class="badge
+                                @(user.Status == "blocked" ? "bg-danger" :
+                                                                user.Status == "unverified" ? "bg-warning" : "bg-success")">
+                                @user.Status
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // IMPORTANT: Select All / Deselect All checkbox logic
+        document.getElementById('selectAll').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+}
