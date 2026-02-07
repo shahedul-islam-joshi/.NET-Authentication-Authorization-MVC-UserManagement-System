@@ -170,33 +170,43 @@ Checkbox grid supports **Select All** toggle via JavaScript.
 - Add DTO mapping layer
 - Add repository/service abstraction
 ## Project Structure
-```
-AuthManagerEnterprise
-│
-├── Controllers
-│   ├── AccountController.cs
-│   └── AdminController.cs
-│
-├── Data
-│   └── ApplicationDbContext.cs
-│
-├── Models
-│   └── DomainModels
-│       └── User.cs
-│
-├── ViewModels
-│   ├── LoginViewModel.cs
-│   ├── RegisterViewModel.cs
-│   └── UserManagementViewModel.cs
-│
-├── Views
-│   ├── Account
+
+```text
+AuthManager Enterprise/
+├── Controllers/
+│   ├── AccountController.cs         # Authentication logic (Login/Register)
+│   ├── AdminController.cs           # Administrative & User management logic
+│   └── HomeController.cs            # Default landing page logic
+├── Data/
+│   └── ApplicationDbContext.cs      # Entity Framework database context
+├── Migrations/                      # Database schema migration files
+├── Models/
+│   ├── DomainModels/
+│   │   └── User.cs                  # Core User data entity
+│   ├── ViewModels/
+│   │   ├── LoginViewModel.cs        # Data for Login UI
+│   │   ├── RegisterViewModel.cs     # Data for Registration UI
+│   │   └── UserManagementViewModel.cs # Data for Admin dashboard
+│   └── ErrorViewModel.cs            # Error handling model
+├── Views/
+│   ├── Account/                     # Auth views (Login, Register)
 │   │   ├── Login.cshtml
 │   │   └── Register.cshtml
-│   ├── Admin
+│   ├── Admin/                       # Admin dashboard views
 │   │   └── Index.cshtml
-│   └── Shared
-│       └── _Layout.cshtml
-│
-└── Program.cs
-```
+│   ├── Home/                        # General site views
+│   │   ├── Index.cshtml
+│   │   └── Privacy.cshtml
+│   ├── Shared/                      # Reusable components & Layout
+│   │   ├── _Layout.cshtml
+│   │   ├── _ValidationScriptsPartial.cshtml
+│   │   └── Error.cshtml
+│   ├── _ViewImports.cshtml          # Global namespaces & Tag Helpers
+│   └── _ViewStart.cshtml            # Default layout settings
+├── wwwroot/                         # Static files (CSS, JS, Libs)
+├── appsettings.json                 # Main configuration (Conn Strings)
+├── appsettings.Development.json     # Environment-specific settings
+├── Dockerfile                       # Container deployment instructions
+├── LICENSE                          # Project licensing terms
+├── Program.cs                       # App entry point & service registration
+└── README.md                        # Documentation
